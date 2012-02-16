@@ -204,7 +204,13 @@ void handle_sigsegv(int sig, siginfo_t *info, void *ucontext)
 	ucontext_t *uc;
 
 	uc = ucontext;
+#if defined(__linux__)
+#ifdef TARGET_X86
 	ip = uc->uc_mcontext.gregs[REG_EIP];
+#elif defined(TARGET_X86_64)
+	ip = uc->uc_mcontext.gregs[REG_RIP];
+#endif
+#endif
 	dprintf(2, "signal:%d address:0x%lx ip:0x%lx\n",
 			sig,
 			/* this is void*, but using %p would print "(null)"

@@ -46,7 +46,7 @@ endif #ARCH_IA64
 			test-async-sig test-flush-cache test-init-remote \
 			test-mem test-setjmp test-ptrace		 \
 			Ltest-nomalloc Ltest-nocalloc rs-race \
-            test-coredump
+            test-coredump-unwind
 
  noinst_PROGRAMS_cdep = forker mapper test-ptrace-misc			 \
 			Gperf-simple Lperf-simple
@@ -114,6 +114,7 @@ Ltest_trace_SOURCES = Ltest-trace.c ident.c
 
 LIBUNWIND = $(top_builddir)/src/libunwind-$(arch).la
 LIBUNWIND_ptrace = $(top_builddir)/src/libunwind-ptrace.a
+LIBUNWIND_coredump = $(top_builddir)/src/libunwind-coredump.a
 
 if USE_ELF32
 LIBUNWIND_ELF = $(top_builddir)/src/libunwind-elf32.la
@@ -164,3 +165,4 @@ Lperf_trace_LDADD = $(LIBUNWIND_local)
 test_setjmp_LDADD = $(LIBUNWIND_setjmp)
 ia64_test_setjmp_LDADD = $(LIBUNWIND_setjmp)
 
+test_coredump_unwind_LDADD = $(LIBUNWIND_coredump) $(LIBUNWIND)
