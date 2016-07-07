@@ -130,6 +130,7 @@ unw_tdep_proc_info_t;
 
 #define unw_tdep_getcontext             UNW_ARCH_OBJ(getcontext)
 #define unw_tdep_is_fpreg               UNW_ARCH_OBJ(is_fpreg)
+#define _UPT_get_fpreg(fpreg, reg)      &fpreg->_st[reg]
 
 extern int unw_tdep_getcontext (unw_tdep_context_t *);
 extern int unw_tdep_is_fpreg (int);

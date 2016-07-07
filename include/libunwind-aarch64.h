@@ -177,6 +177,7 @@ typedef ucontext_t unw_tdep_context_t;
 
 #define unw_tdep_getcontext(uc)         (getcontext (uc), 0)
 #define unw_tdep_is_fpreg               UNW_ARCH_OBJ(is_fpreg)
+#define _UPT_get_fpreg(fpreg, reg)      &fpreg.vregs[reg]
 
 extern int unw_tdep_is_fpreg (int);
 

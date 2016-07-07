@@ -294,6 +294,7 @@ unw_tdep_proc_info_t;
 
 #define unw_tdep_is_fpreg               UNW_ARCH_OBJ(is_fpreg)
 extern int unw_tdep_is_fpreg (int);
+#define _UPT_get_fpreg(fpreg, reg)      &fpreg.fpregs[reg]
 
 #if defined(__cplusplus) || defined(c_plusplus)
 }

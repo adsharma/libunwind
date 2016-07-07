@@ -179,6 +179,7 @@ extern int unw_tdep_getcontext (unw_tdep_context_t *);
 
 #define unw_tdep_is_fpreg               UNW_ARCH_OBJ(is_fpreg)
 extern int unw_tdep_is_fpreg (int);
+#define _UPT_get_fpreg(fpreg, reg)      &fpreg->_st[reg]
 
 #if defined(__cplusplus) || defined(c_plusplus)
 }

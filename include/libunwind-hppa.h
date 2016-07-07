@@ -104,6 +104,7 @@ unw_tdep_save_loc_t;
 typedef ucontext_t unw_tdep_context_t;
 
 #define unw_tdep_is_fpreg(r)            ((unsigned) ((r) - UNW_HPPA_FR) < 32)
+#define _UPT_get_fpreg(fpreg, reg)       &fpreg.fp_dregs[reg]
 
 #include "libunwind-dynamic.h"
 

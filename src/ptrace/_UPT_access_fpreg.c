@@ -26,7 +26,40 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 
 #include "_UPT_internal.h"
 
-#if HAVE_DECL_PTRACE_POKEUSER || HAVE_TTRACE
+/* Architecture specific ptrace helper must be implemented,
+ * else we fall back to the old - and deprecated -  ABI implementation
+ */
+#if HAVE_DECL_PTRACE_GETREGSET && defined(_UPT_get_fpreg)
+int
+_UPT_access_fpreg (unw_addr_space_t as, unw_regnum_t reg, unw_fpreg_t *val,
+                   int write, void *arg)
+{
+  struct UPT_info *ui = arg;
+  pid_t pid = ui->pid;
+  struct iovec iovec = { 0 };
+  fpregset_t fpreg = { 0 };
+
+  if ((unsigned) reg >= ARRAY_SIZE (_UPT_reg_offset))
+    return -UNW_EBADREG;
+
+  iovec.iov_base = &fpreg;
+  iovec.iov_len = sizeof(fpreg);
+
+  if (ptrace(PTRACE_GETREGSET, pid, NT_FPREGSET, &iovec) == -1)
+    return -UNW_EBADREG;
+
+  if (write)
+  {
+    memcpy(_UPT_get_fpreg(fpreg, reg), val, sizeof(unw_fpreg_t));
+
+    if (ptrace(PTRACE_SETREGSET, pid, NT_FPREGSET, &iovec) == -1)
+      return -UNW_EBADREG;
+  } else
+    memcpy(val, _UPT_get_fpreg(fpreg, reg), sizeof(unw_fpreg_t));
+
+  return 0;
+}
+#elif HAVE_DECL_PTRACE_POKEUSER || HAVE_TTRACE
 int
 _UPT_access_fpreg (unw_addr_space_t as, unw_regnum_t reg, unw_fpreg_t *val,
                    int write, void *arg)
