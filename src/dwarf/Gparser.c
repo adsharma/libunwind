@@ -39,7 +39,11 @@ read_regnum (unw_addr_space_t as, unw_accessors_t *a, unw_word_t *addr,
   if ((ret = dwarf_read_uleb128 (as, a, addr, valp, arg)) < 0)
     return ret;
 
+#ifdef UNW_TARGET_ARM
+  if (!(*valp < DWARF_NUM_PRESERVED_REGS || (UNW_ARM_D0 <= *valp && *valp <=UNW_ARM_D15)))
+#else
   if (*valp >= DWARF_NUM_PRESERVED_REGS)
+#endif
     {
       Debug (1, "Invalid register number %u\n", (unsigned int) *valp);
       return -UNW_EBADREG;
@@ -54,6 +58,7 @@ set_reg (dwarf_state_record_t *sr, unw_word_t regnum, dwarf_where_t where,
   sr->rs_current.reg[regnum].where = where;
   sr->rs_current.reg[regnum].val = val;
 }
+
 
 /* Run a CFI program to update the register state.  */
 static int
@@ -160,7 +165,23 @@ run_cfi_program (struct dwarf_cursor *c, dwarf_state_record_t *sr,
           if (((ret = read_regnum (as, a, addr, &regnum, arg)) < 0)
               || ((ret = dwarf_read_uleb128 (as, a, addr, &val, arg)) < 0))
             goto fail;
-          set_reg (sr, regnum, DWARF_WHERE_CFAREL, val * dci->data_align);
+#ifdef UNW_TARGET_ARM
+	  if (UNW_ARM_D0 <= regnum && regnum <=UNW_ARM_D15) {
+            // ARM vfpv3 D0-D15 registers
+	    regnum = UNW_ARM_S0 + ((regnum - UNW_ARM_D0) * 2);
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	    set_reg(sr, regnum, DWARF_WHERE_CFAREL, (val-1) * dci->data_align);
+	    set_reg(sr, regnum+1, DWARF_WHERE_CFAREL, val * dci->data_align);
+#else
+	    set_reg(sr, regnum, DWARF_WHERE_CFAREL, val * dci->data_align);
+	    set_reg(sr, regnum+1, DWARF_WHERE_CFAREL, (val-1) * dci->data_align);
+#endif
+	  } else {
+	    set_reg (sr, regnum, DWARF_WHERE_CFAREL, val * dci->data_align);
+          }
+#else
+	  set_reg (sr, regnum, DWARF_WHERE_CFAREL, val * dci->data_align);
+#endif
           Debug (15, "CFA_offset_extended r%lu at cf+0x%lx\n",
                  (long) regnum, (long) (val * dci->data_align));
           break;
