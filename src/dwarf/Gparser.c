@@ -813,7 +813,7 @@ apply_reg_state (struct dwarf_cursor *c, struct dwarf_reg_state *rs)
           break;
 
         case DWARF_WHERE_REG:
-          c->loc[i] = DWARF_REG_LOC (c, dwarf_to_unw_regnum (rs->reg[i].val));
+          c->loc[i] = c->loc[rs->reg[i].val];
           break;
 
         case DWARF_WHERE_EXPR:
